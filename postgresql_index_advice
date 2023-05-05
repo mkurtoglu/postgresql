@@ -1,0 +1,16 @@
+psql -d $1 -c "$2"  -t -o explain.out -d
+ prev=
+cat explain.out | grep   -A 3  "Seq Scan" | grep  -B 2  Filter |while read line
+do
+    if [ ! -z "${prev}" ];then
+        line1="${prev}"
+        line2="${line}"
+        tablo=`echo  "${line1}  ${line2}" | grep -E 'Scan.*on\s*([a-zA-Z]+\w*)'  | grep 'Seq Scan' | sed 's/.*Seq Scan on//'  | sed 's/ (cost.*//' | awk '{print $1;}'`
+        kolonlar=`echo  "${line1}  ${line2}" | grep -E 'Scan.*on\s*([a-zA-Z]+\w*)'  | grep 'Filter' | sed 's/.*Filter: //'  `
+        kolonlar=`echo "${kolonlar}" | grep --perl-regexp '\w+ (?==)'  --only-matching  | sort |  awk '{print}' ORS=''  `
+        if [ ! -z "${kolonlar}" ];then
+           echo "table:${tablo} adviced_index_columns:${kolonlar}"
+        fi
+ fi
+    prev="${line}"
+done
