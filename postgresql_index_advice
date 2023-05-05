@@ -1,4 +1,4 @@
-psql -d $1 -c "$2"  -t -o explain.out -d
+psql -p$1 -d $2 -c "$3"  -t -o explain.out
  prev=
 cat explain.out | grep   -A 3  "Seq Scan" | grep  -B 2  Filter |while read line
 do
@@ -14,3 +14,4 @@ do
  fi
     prev="${line}"
 done
+[postgres@n
